@@ -57,6 +57,6 @@ Native inspection points to the retained Fabric container lifecycle:
 A local two-part experiment fixed ten raw cycles and ten HeroUI nested-overlay cycles:
 
 1. In `maybeShow`, call `bringSubviewToFront:` when `_container.superview == window`; otherwise call `addSubview:`.
-2. Call `maybeShow` after `mountChildComponentView` mounts the Fabric child.
+2. After `mountChildComponentView` mounts the Fabric child, call `maybeShow` when the overlay component is already attached to a superview. Normal first mounting remains handled by `didMoveToSuperview`.
 
 This repository intentionally contains stock dependency code and demonstrates the bug; it does not apply that patch.
