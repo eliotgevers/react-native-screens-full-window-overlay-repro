@@ -30,7 +30,7 @@ bunx expo run:ios
 4. Tap **Close parent overlay**.
 5. Repeat steps 1–4.
 
-On the fourth cycle in this clean raw reduction, the retained/recycled native overlay containers remain mounted and accessible but their visible content disappears behind the window's other subviews. The exact first failing cycle varies with component presence/animation; a HeroUI `Dialog` containing a `Select` consistently failed on cycle three in a separate clean project.
+On the fourth cycle in this clean raw reduction, the retained/recycled native overlay containers remain mounted and accessible but their visible content disappears behind the window's other subviews. The base screen still reports `Requested state: parent open, child open`, making the missing native surfaces explicit. The child card directly overlaps the parent card when ordering is correct. The exact first failing cycle varies with component presence/animation; a HeroUI `Dialog` containing a `Select` consistently failed on cycle three in a separate clean project.
 
 ## Expected
 

@@ -17,6 +17,13 @@ export default function Reproduction() {
     <View style={styles.screen}>
       <Text style={styles.title}>FullWindowOverlay sibling reproduction</Text>
       <Text style={styles.counter}>Completed parent cycles: {cycles}</Text>
+      <Text style={styles.state}>
+        Requested state: parent {parentOpen ? "open" : "closed"}, child{" "}
+        {childOpen ? "open" : "closed"}
+      </Text>
+      {parentOpen ? (
+        <Text style={styles.state}>Opening cycle: {cycles + 1}</Text>
+      ) : null}
       <Pressable
         accessibilityRole="button"
         onPress={() => setParentOpen(true)}
@@ -29,7 +36,9 @@ export default function Reproduction() {
         <FullWindowOverlay>
           <View style={styles.parentBackdrop}>
             <View style={styles.parentCard}>
-              <Text style={styles.cardTitle}>Parent overlay</Text>
+              <Text style={styles.cardTitle}>
+                Parent overlay · cycle {cycles + 1}
+              </Text>
               <Pressable
                 accessibilityRole="button"
                 onPress={() => setChildOpen(true)}
@@ -53,7 +62,9 @@ export default function Reproduction() {
         <FullWindowOverlay>
           <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
             <View style={styles.childCard}>
-              <Text style={styles.childTitle}>Child overlay</Text>
+              <Text style={styles.childTitle}>
+                Child overlay · cycle {cycles + 1}
+              </Text>
               <Pressable
                 accessibilityRole="button"
                 onPress={() => setChildOpen(false)}
@@ -84,6 +95,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   counter: { color: "#666", marginBottom: 24, marginTop: 8 },
+  state: {
+    color: "#991b1b",
+    fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
   primaryButton: {
     backgroundColor: "#2563eb",
     borderRadius: 12,
@@ -119,12 +136,13 @@ const styles = StyleSheet.create({
   closeButton: { alignSelf: "flex-start", marginTop: 20, paddingVertical: 8 },
   closeButtonText: { color: "#2563eb", fontWeight: "600" },
   childCard: {
-    alignSelf: "center",
     backgroundColor: "#f97316",
     borderRadius: 20,
-    marginTop: 540,
     padding: 20,
-    width: 260,
+    position: "absolute",
+    top: 370,
+    width: 330,
+    left: 36,
   },
   childTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
   option: {
