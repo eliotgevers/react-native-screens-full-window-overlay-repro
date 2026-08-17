@@ -40,9 +40,11 @@ The most recently presented child overlay stays above the parent overlay, and bo
 
 The first three cycles are correct; cycle four is visually missing even though the child controls remain in the accessibility hierarchy.
 
-| Stock cycle 3                                            | Stock cycle 4                                                     | Candidate patch, cycle 10                                                |
-| -------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| ![Both raw overlays visible](evidence/stock-cycle-3.png) | ![Recycled overlays visually missing](evidence/stock-cycle-4.png) | ![Both overlays remain correctly ordered](evidence/patched-cycle-10.png) |
+The consumer-level symptom is especially clear with a Dialog and nested Select: the trigger indicator points upward on the broken reopen, proving the Select is open, but its menu is absent. These screenshots use HeroUI Native 1.0.8 as a thin consumer of two RNS overlays; the raw app in this repository is the package-boundary reduction.
+
+| Stock first open                                                       | Stock broken reopen                                                                     | Candidate patch, cycle 5                                                                                |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| ![Select menu visible on first open](evidence/consumer-first-open.png) | ![Select is open but its menu is visually missing](evidence/consumer-broken-reopen.png) | ![Select menu remains visible after repeated patched reopenings](evidence/consumer-patched-cycle-5.png) |
 
 ## Reduction result
 
