@@ -60,3 +60,5 @@ A local two-part experiment fixed ten raw cycles and ten HeroUI nested-overlay c
 2. After `mountChildComponentView` mounts the Fabric child, call `maybeShow` when the overlay component is already attached to a superview. Normal first mounting remains handled by `didMoveToSuperview`.
 
 This repository intentionally contains stock dependency code and demonstrates the bug; it does not apply that patch.
+
+Upstream tracking: [react-native-screens issue #4511](https://github.com/software-mansion/react-native-screens/issues/4511) and [fix PR #4512](https://github.com/software-mansion/react-native-screens/pull/4512).
