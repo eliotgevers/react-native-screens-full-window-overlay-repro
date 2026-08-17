@@ -1,66 +1,43 @@
-# `FullWindowOverlay` sibling order breaks after Fabric recycling
+# `FullWindowOverlay` lifecycle investigation (reproduction retracted)
 
-Minimal iOS reproduction for a `react-native-screens` `FullWindowOverlay` lifecycle bug. It uses two raw sibling overlays and no component library.
+This repository was created from the default Expo 57 template to investigate a suspected iOS/Fabric sibling-order defect in `react-native-screens` `FullWindowOverlay`.
 
-The project was created interactively with `bun create expo-app` using the current default Expo template, then reduced to this single screen.
+## Verification correction — 2026-08-17
 
-## Versions
+The repository does **not** currently reproduce the reported defect. I am retracting the earlier package-boundary and regression claims rather than leaving maintainers with an unsupported reproduction.
+
+A fresh clean-room audit found:
+
+- Stock `react-native-screens` 4.27.0 passed 20 raw sibling-overlay lifecycle runs.
+- Stock 4.27.0 passed 10 HeroUI Native 1.0.8 Dialog/Select cycles.
+- Stock 4.25.2 passed 10 Dialog/Select cycles where the Select closed through selection.
+- Stock 4.25.2 passed another 10 cycles where the Select closed through its backdrop.
+- The previously published “before” and “after” screenshots both showed the Select menu visible; they did not document a failure.
+- An older nearly blank raw screenshot was a transient Simulator framebuffer capture, not evidence that mounted overlays had moved behind the app surface.
+
+The native experiment in [software-mansion/react-native-screens#4512](https://github.com/software-mansion/react-native-screens/pull/4512) therefore lacks a verified stock failure and should not be merged. The issue and PR have been retracted and closed.
+
+## What remains known
+
+An AeroVia app build previously showed a nested Dialog/Select ordering symptom and native hierarchy reuse. That observation is real, but this clean default-template reduction does not reproduce it, so the responsible package boundary remains unresolved. Possible app-specific contributors must be isolated before any new upstream report.
+
+## Versions audited
 
 - Expo 57.0.14
 - React Native 0.86.2
 - React 19.2.3
-- `react-native-screens` 4.27.0
-- Fabric enabled by the current Expo default
-- Reproduced on iPhone 17 Pro Simulator, iOS 26.5
+- HeroUI Native 1.0.8 for the consumer test
+- `react-native-screens` 4.25.2 and 4.27.0
+- Fabric / New Architecture
+- iPhone 17 Pro Simulator, iOS 26.5
 
-The `overrides` entry intentionally keeps Expo Router and the app on one copy of `react-native-screens` 4.27.0.
+## Historical harness
 
-## Run
+The source remains available as an investigation harness and negative control:
 
 ```bash
 bun install
 bunx expo run:ios
 ```
 
-## Deterministic steps
-
-1. Tap **Open parent overlay**.
-2. Tap **Open child overlay**. Both overlays are visible on the first cycle.
-3. Tap **Close child overlay**.
-4. Tap **Close parent overlay**.
-5. Repeat steps 1–4.
-
-On the fourth cycle in this clean raw reduction, the retained/recycled native overlay containers remain mounted and accessible but their visible content disappears behind the window's other subviews. The base screen still reports `Requested state: parent open, child open`, making the missing native surfaces explicit. The child card directly overlaps the parent card when ordering is correct. The exact first failing cycle varies with component presence/animation; a HeroUI `Dialog` containing a `Select` consistently failed on cycle three in a separate clean project.
-
-## Expected
-
-The most recently presented child overlay stays above the parent overlay, and both stay above the app surface, on every cycle.
-
-## Actual
-
-The first three cycles are correct; cycle four is visually missing even though the child controls remain in the accessibility hierarchy.
-
-The consumer-level symptom is especially clear with a Dialog and nested Select: the trigger indicator points upward on the broken reopen, proving the Select is open, but its menu is absent. These screenshots use HeroUI Native 1.0.8 as a thin consumer of two RNS overlays; the raw app in this repository is the package-boundary reduction.
-
-| Stock first open                                                       | Stock broken reopen                                                                     | Candidate patch, cycle 5                                                                                |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| ![Select menu visible on first open](evidence/consumer-first-open.png) | ![Select is open but its menu is visually missing](evidence/consumer-broken-reopen.png) | ![Select menu remains visible after repeated patched reopenings](evidence/consumer-patched-cycle-5.png) |
-
-## Reduction result
-
-HeroUI Native and Uniwind are not involved in this reproduction. The failure is present with raw `FullWindowOverlay` siblings.
-
-Native inspection points to the retained Fabric container lifecycle:
-
-- `prepareForRecycle` removes `_container` but deliberately retains it.
-- `maybeShow` only calls `addSubview:` when the container is absent, so it does not reassert sibling order for an attached retained container.
-- A Fabric child can mount into a retained overlay without `didMoveToSuperview` or `didMoveToWindow` running again.
-
-A local two-part experiment fixed ten raw cycles and ten HeroUI nested-overlay cycles:
-
-1. In `maybeShow`, call `bringSubviewToFront:` when `_container.superview == window`; otherwise call `addSubview:`.
-2. After `mountChildComponentView` mounts the Fabric child, call `maybeShow` when the overlay component is already attached to a superview. Normal first mounting remains handled by `didMoveToSuperview`.
-
-This repository intentionally contains stock dependency code and demonstrates the bug; it does not apply that patch.
-
-Upstream tracking: [react-native-screens issue #4511](https://github.com/software-mansion/react-native-screens/issues/4511) and [fix PR #4512](https://github.com/software-mansion/react-native-screens/pull/4512).
+It must not be cited as a deterministic reproduction unless a future stock run produces a stable, repeatable failure with independently verified visual evidence.
